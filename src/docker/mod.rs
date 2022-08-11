@@ -103,8 +103,8 @@ async fn internal_docker_metrics(reporter: &Reporter, docker: &Docker, total_cac
                     memory_pgmajfault: mem_pgmajfault(&mem_stats),
                     memory_unevictable: mem_unevictable(&mem_stats),
                     memory_usage_bytes: mem_usage(&mem_stats),
-                    memory_limit_bytes: mem_stats.limit.unwrap(),
-                    memory_percentage: mem_stats.usage.unwrap() as f64 / mem_stats.limit.unwrap() as f64,
+                    memory_limit_bytes: mem_limit(&mem_stats),
+                    memory_percentage: mem_percent(&mem_stats),
                 });
                 total_cache.put(String::from(container_id), cpu_total);
                 system_cache.put(String::from(container_id), cpu_system);
@@ -291,6 +291,19 @@ fn mem_usage(mem_stat: &MemoryStats) -> u64 {
                 }
             }
         }
+    }
+}
+
+fn mem_limit(mem_stat: &MemoryStats) -> u64 {
+    mem_stat.limit.unwrap_or(0)
+}
+
+fn mem_percent(mem_stat: &MemoryStats) -> f64 {
+    let limit = mem_limit(mem_stat);
+    if limit == 0 {
+        mem_usage(mem_stat) as f64 / limit as f64
+    } else {
+        0 as f64
     }
 }
 
