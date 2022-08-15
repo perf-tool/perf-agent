@@ -301,9 +301,9 @@ fn mem_limit(mem_stat: &MemoryStats) -> u64 {
 fn mem_percent(mem_stat: &MemoryStats) -> f64 {
     let limit = mem_limit(mem_stat);
     if limit == 0 {
-        mem_usage(mem_stat) as f64 / limit as f64
-    } else {
         0 as f64
+    } else {
+        mem_usage(mem_stat) as f64 / limit as f64
     }
 }
 
