@@ -73,8 +73,12 @@ async fn internal_docker_metrics(reporter: &Reporter, docker: &Docker, total_cac
                     ..Default::default()
                 }),
             ).take(1);
-        let stats_res: Result<Stats, bollard::errors::Error> = stream.next().await.unwrap();
-        match stats_res {
+        let stats_res_op: Option<Result<Stats, bollard::errors::Error>> = stream.next().await;
+        if stats_res_op.is_none() {
+            log::warn!("no stats for container {}", container_id);
+            continue;
+        }
+        match stats_res_op.unwrap() {
             Ok(stats) => {
                 log::trace!("container id {} name {} status {:?}", container_id, container_name, stats);
                 let cpu_stats = stats.cpu_stats;
