@@ -106,9 +106,11 @@ async fn internal_docker_metrics(reporter: &Reporter, docker: &Docker, total_cac
                     memory_pgfault: mem_pgfault(&mem_stats),
                     memory_pgmajfault: mem_pgmajfault(&mem_stats),
                     memory_unevictable: mem_unevictable(&mem_stats),
+                    memory_cache_bytes: mem_cache(&mem_stats),
                     memory_usage_bytes: mem_usage(&mem_stats),
                     memory_limit_bytes: mem_limit(&mem_stats),
                     memory_percentage: mem_percent(&mem_stats),
+                    memory_cache_percentage: mem_cache_percent(&mem_stats),
                 });
                 total_cache.put(String::from(container_id), cpu_total);
                 system_cache.put(String::from(container_id), cpu_system);
@@ -298,6 +300,29 @@ fn mem_usage(mem_stat: &MemoryStats) -> u64 {
     }
 }
 
+fn mem_cache(mem_stat: &MemoryStats) -> u64 {
+    match mem_stat.stats {
+        None => {
+            0
+        }
+
+        Some(stats) => {
+            match stats {
+                MemoryStatsStats::V1(v1) => {
+                    if v1.cache > 0 {
+                        v1.cache
+                    } else {
+                        v1.total_inactive_file
+                    }
+                }
+                MemoryStatsStats::V2(v2) => {
+                    v2.inactive_file
+                }
+            }
+        }
+    }
+}
+
 fn mem_limit(mem_stat: &MemoryStats) -> u64 {
     mem_stat.limit.unwrap_or(0)
 }
@@ -309,6 +334,15 @@ fn mem_percent(mem_stat: &MemoryStats) -> f64 {
     } else {
         mem_usage(mem_stat) as f64 / limit as f64
     }
+}
+
+fn mem_cache_percent(mem_stat: &MemoryStats) -> f64 {
+        let limit = mem_limit(mem_stat);
+        if limit == 0 {
+            0 as f64
+        } else {
+            mem_cache(mem_stat) as f64 / limit as f64
+        }
 }
 
 #[derive(Debug)]
@@ -329,7 +363,9 @@ pub struct DockerMetrics {
     pub memory_pgfault: u64,
     pub memory_pgmajfault: u64,
     pub memory_unevictable: u64,
+    pub memory_cache_bytes: u64,
     pub memory_usage_bytes: u64,
     pub memory_limit_bytes: u64,
     pub memory_percentage: f64,
+    pub memory_cache_percentage: f64,
 }
