@@ -64,10 +64,10 @@ struct InfluxDockerMemMetrics {
 }
 
 pub async fn report_influx(reporter: &Reporter, docker_metrics: Vec<DockerMetrics>) -> Result<(), Box<dyn std::error::Error>> {
-    let mut cpu_influx = vec![];
-    let mut mem_influx = vec![];
+    let mut cpu_influx_vec = vec![];
+    let mut mem_influx_vec = vec![];
     for docker_metric in docker_metrics {
-        cpu_influx.push(
+        cpu_influx_vec.push(
             InfluxDockerCpuMetrics {
                 time: docker_metric.time,
                 usage_in_kernelmode: docker_metric.cpu_usage_in_kernelmode,
@@ -82,7 +82,7 @@ pub async fn report_influx(reporter: &Reporter, docker_metrics: Vec<DockerMetric
                 host: util::NODE_HOST_NAME.to_string(),
             }.into_query(INFLUX_CPU_MEASUREMENT_NAME)
         );
-        mem_influx.push(
+        mem_influx_vec.push(
             InfluxDockerMemMetrics {
                 time: docker_metric.time,
                 limit: docker_metric.memory_limit_bytes,
@@ -107,7 +107,13 @@ pub async fn report_influx(reporter: &Reporter, docker_metrics: Vec<DockerMetric
         );
     }
     let client = reporter.influxdb();
-    client.query(cpu_influx).await?;
-    client.query(mem_influx).await?;
+    for cpu_influx in &cpu_influx_vec {
+        log::debug!("report cpu metrics to influxdb {:?}", cpu_influx);
+    }
+    client.query(cpu_influx_vec).await?;
+    for mem_influx in &mem_influx_vec {
+        log::debug!("report mem metrics to influxdb {:?}", mem_influx);
+    }
+    client.query(mem_influx_vec).await?;
     Ok(())
 }
