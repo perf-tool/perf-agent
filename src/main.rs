@@ -65,6 +65,11 @@ async fn main() {
         .level(log_level)
         .chain(std::io::stdout())
         .apply().unwrap();
+    log::trace!("trace log enabled");
+    log::debug!("debug log enabled");
+    log::info!("info log enabled");
+    log::warn!("warn log enabled");
+    log::error!("error log enabled");
     log::info!("node host name is {}", *util::NODE_HOST_NAME);
     let signal = chan_signal::notify(&[Signal::INT, Signal::TERM]);
     let reporter;

@@ -127,6 +127,7 @@ async fn internal_docker_metrics(reporter: &Reporter, docker: &Docker, total_cac
 }
 
 async fn report_metrics(reporter: &Reporter, docker_metrics: Vec<DockerMetrics>) {
+    log::info!("prepare to report docker metrics {:?}", docker_metrics);
     match reporter.reporter_type {
         ReporterType::Log => {
             for docker_metric in docker_metrics {
