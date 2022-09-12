@@ -32,7 +32,7 @@ futures-util = "0.3.24"
 lazy_static = "1.4.0"
 influxdb = { version = "0.5.2", features = ["derive"] }
 log = "0.4"
-lru = "0.7.8"
+lru = "0.8.0"
 serde = { version = "1.0.144", features = ["derive"] }
 serde-env = "0.0.3"
 tokio = { version = "1.21.0", features = ["full"] }
