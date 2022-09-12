@@ -16,6 +16,7 @@
 // under the License.
 
 use std::collections::HashMap;
+use std::num::NonZeroUsize;
 use std::time::Duration;
 
 use bollard::container::{ListContainersOptions, MemoryStats, MemoryStatsStats, Stats, StatsOptions};
@@ -32,8 +33,8 @@ mod influx;
 pub async fn docker_metrics(reporter: &Reporter) {
     let mut interval_timer = tokio::time::interval(Duration::from_secs(1));
     let docker = Docker::connect_with_socket_defaults().unwrap();
-    let mut total_usage_cache: LruCache<String, u64> = LruCache::new(512);
-    let mut system_usage_cache: LruCache<String, u64> = LruCache::new(512);
+    let mut total_usage_cache: LruCache<String, u64> = LruCache::new(NonZeroUsize::new(512).unwrap());
+    let mut system_usage_cache: LruCache<String, u64> = LruCache::new(NonZeroUsize::new(512).unwrap());
     loop {
         interval_timer.tick().await;
         match internal_docker_metrics(reporter, &docker, &mut total_usage_cache, &mut system_usage_cache).await {
