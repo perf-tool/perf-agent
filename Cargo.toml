@@ -28,7 +28,7 @@ chan = "0.1.23"
 chan-signal = "0.3.3"
 chrono = "0.4"
 fern = "0.6.1"
-futures-util = "0.3.25"
+futures-util = "0.3.26"
 lazy_static = "1.4.0"
 influxdb = { version = "0.5.2", features = ["derive"] }
 log = "0.4"
